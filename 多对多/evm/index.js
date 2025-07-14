@@ -10,6 +10,7 @@ const path = require('path');
 const readline = require('readline');
 const { ethers } = require('ethers');
 const dotenv = require('dotenv');
+const dayjs = require('dayjs');
 
 // ==== 加载配置 ====
 const envPath = path.resolve(__dirname, './.env');
@@ -41,6 +42,7 @@ const config = {
 
   addressFile: envConfig.ADDRESS_FILE || 'address.txt',
 };
+const formatted = dayjs().format('MMDDHHmmss');
 
 // ==== 工具函数 ====
 function sleep(ms) {
@@ -73,7 +75,6 @@ async function previewTransfers(provider) {
   const lines = raw.split(/\r?\n/).filter(l => l.trim());
 
   const tokenIsNative = config.tokenAddress.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-
 
   const result = [];
   const skipped = [];
@@ -124,7 +125,7 @@ async function previewTransfers(provider) {
   }
   const logDir = path.resolve(__dirname, 'logs');
   if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
-  const previewPath = path.join(logDir, `preview_${config.addressFile}_${Date.now()}.txt`);
+  const previewPath = path.join(logDir, `预交易信息-${config.addressFile}-${formatted}.txt`);
 
   fs.writeFileSync(previewPath, previewLines.join('\n'), 'utf-8');
   console.log(`✅ 转账预览已生成：${previewPath}`);
@@ -141,8 +142,8 @@ async function executeTransfers(provider, list) {
 
   const logDir = path.resolve(__dirname, 'logs');
   if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
-  const successLog = path.join(logDir, `${config.addressFile}_success_${Date.now()}.txt`);
-  const failLog = path.join(logDir, `${config.addressFile}_fail_${Date.now()}.txt`);
+  const successLog = path.join(logDir, `交易成功-${config.addressFile}-${formatted}.txt`);
+  const failLog = path.join(logDir, `交易失败-${config.addressFile}-${formatted}.txt`);
 
   for (const { privateKey, from, to, amount } of list) {
     const wallet = new ethers.Wallet(privateKey, provider);
@@ -238,7 +239,7 @@ async function getTokenMetadata(provider, tokenAddress) {
 
   if (transferList.length === 0) {
     const logDir = path.resolve(__dirname, 'logs');
-    const skippedPath = path.join(logDir, `skipped_${Date.now()}.txt`);
+    const skippedPath = path.join(logDir, `无效交易-${config.addressFile}-${formatted}.txt`);
     fs.writeFileSync(skippedPath, skipped.join('\n'), 'utf-8');
     console.log(`❗没有可执行的转账任务。已跳过 ${skipped.length} 个地址`);
     console.log(`📄 跳过原因详情见：${skippedPath}`);

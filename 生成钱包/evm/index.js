@@ -30,7 +30,7 @@ const isUsingSingleMnemonic = envConfig.USE_SINGLE_MNEMONIC === 'false';
 
 
 (async () => {
-    const formatted = dayjs().format('MMDD-HHmmss');
+    const formatted = dayjs().format('MMDDHHmmss');
 
     const docDir = path.join(__dirname, './doc');
     if (!fs.existsSync(docDir)) {
@@ -67,9 +67,8 @@ const isUsingSingleMnemonic = envConfig.USE_SINGLE_MNEMONIC === 'false';
 
     }
     // 写入 Excel 文件
-    const filePath = path.join(docDir, `${formatted}-${num}-wallets.xlsx`);
+    const filePath = path.join(docDir, `${num}-${formatted}-wallets.xlsx`);
     await workbook.xlsx.writeFile(filePath);
-
 
     console.log(`${num}个钱包已生成成功！保存至：${filePath}`);
 })()

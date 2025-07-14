@@ -28,6 +28,12 @@ const tokenAddress = envConfig.TOKEN_ADDRESS;
 const addressFile = envConfig.ADDRESS_FILE;
 const MAX_RETRIES = parseInt(envConfig.MAX_RETRIES || '3');
 const RETRY_DELAY_MS = parseInt(envConfig.RETRY_DELAY_MS || '500');
+const dayjs = require('dayjs');
+const formatted = dayjs().format('MMDDHHmmss');
+const docDir = path.join(__dirname, './logs');
+if (!fs.existsSync(docDir)) {
+    fs.mkdirSync(docDir);
+}
 
 (async () => {
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
@@ -72,9 +78,20 @@ const RETRY_DELAY_MS = parseInt(envConfig.RETRY_DELAY_MS || '500');
             console.warn('自动识别原生币失败，默认显示为“原生币”');
         }
     }
-    let addressList = fs.readFileSync(path.join(__dirname, `./doc/${addressFile}`), 'utf8').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-    fs.writeFileSync(path.join(__dirname, `./log/成功日志-${addressFile}`), `【成功】查询代币：${symbol}（${tokenAddress}）\n\n`);
-    fs.writeFileSync(path.join(__dirname, `./log/失败日志-${addressFile}`), `【失败】查询代币：${symbol}（${tokenAddress}）\n\n`);
+    let addressList;
+    try {
+        addressList = fs.readFileSync(path.join(__dirname, `./doc/${addressFile}`), 'utf8').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    } catch (error) {
+        console.log(`你配置读取的${addressFile}文件 不存在，请检查后重新运行代码`);
+        return
+    }
+    if (addressList.length == 0) {
+        console.log(`你配置读取的${addressFile}文件没有内容，请检查后重新运行代码`);
+        return;
+    }
+    fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}`), `【成功】查询代币：${symbol}（${tokenAddress}）\n\n`);
+    fs.appendFileSync(path.join(__dirname, `./logs/查询失败-${addressFile}-${formatted}`), `【失败】查询代币：${symbol}（${tokenAddress}）\n\n`);
+    let failNum = 0;
     for (let i = 0; i < addressList.length; i++) {
         const address = addressList[i];
         try {
@@ -83,13 +100,15 @@ const RETRY_DELAY_MS = parseInt(envConfig.RETRY_DELAY_MS || '500');
             );
             const balance = ethers.utils.formatUnits(rawBalance, decimals);
             console.log(`第${i}个钱包 ${address} 的 ${symbol} 余额为：${balance}`);
-            fs.appendFileSync(path.join(__dirname, `./log/成功日志-${addressFile}`), `${address}:${balance}\n`);
+            fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}`), `${address}:${balance}\n`);
         } catch (error) {
+            failNum++;
             console.error(`第${i}个钱包 ${address} 查询失败：${error.message}`);
-            fs.appendFileSync(path.join(__dirname, `./log/失败日志-${addressFile}`), `${address}\n`);
+            fs.appendFileSync(path.join(__dirname, `./logs/查询失败-${addressFile}-${formatted}`), `${address}\n`);
         }
     }
-    console.log(`\n查询完成，结果已保存至：./log/成功日志-${addressFile}`);
+    console.log(`\n查询完成，结果已保存至：./logs/查询成功-${addressFile}-${formatted}`);
+
 })()
 
 // 简单延迟函数
