@@ -70,8 +70,13 @@ function toReadable(balance, decimals = 18) {
 
 // ==== 预览转账信息 ====
 async function previewTransfers(provider) {
-
-  const raw = fs.readFileSync(path.resolve(__dirname, 'doc', config.addressFile), 'utf-8');
+  let raw;
+  try {
+    raw = fs.readFileSync(path.resolve(__dirname, 'doc', config.addressFile), 'utf-8');
+  } catch (error) {
+    console.log(`你配置读取的${config.addressFile}文件 不存在，请检查后重新运行代码`);
+    process.exit(0);
+  }
   const lines = raw.split(/\r?\n/).filter(l => l.trim());
 
   const tokenIsNative = config.tokenAddress.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
