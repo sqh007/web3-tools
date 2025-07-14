@@ -1,0 +1,20 @@
+# 忽略编译产物
+*.class
+*.pyc
+*.o
+
+# 忽略 IDE 配置
+.idea/
+.vscode/
+
+# 忽略依赖目录
+node_modules/
+vendor/
+
+# 忽略环境配置
+.env
+
+# 忽略指定类型文件
+*.txt
+*.xlsx
+*.zip
