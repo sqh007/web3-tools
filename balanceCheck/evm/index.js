@@ -89,8 +89,7 @@ if (!fs.existsSync(docDir)) {
         console.log(`你配置读取的${addressFile}文件没有内容，请检查后重新运行代码`);
         return;
     }
-    fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}`), `【成功】查询代币：${symbol}（${tokenAddress}）\n\n`);
-    fs.appendFileSync(path.join(__dirname, `./logs/查询失败-${addressFile}-${formatted}`), `【失败】查询代币：${symbol}（${tokenAddress}）\n\n`);
+    fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}.txt`), `【成功】查询代币：${symbol}（${tokenAddress}）\n\n`);
     let failNum = 0;
     for (let i = 0; i < addressList.length; i++) {
         const address = addressList[i];
@@ -100,11 +99,11 @@ if (!fs.existsSync(docDir)) {
             );
             const balance = ethers.utils.formatUnits(rawBalance, decimals);
             console.log(`第${i}个钱包 ${address} 的 ${symbol} 余额为：${balance}`);
-            fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}`), `${address}:${balance}\n`);
+            fs.appendFileSync(path.join(__dirname, `./logs/查询成功-${addressFile}-${formatted}.txt`), `${address}:${balance}\n`);
         } catch (error) {
             failNum++;
             console.error(`第${i}个钱包 ${address} 查询失败：${error.message}`);
-            fs.appendFileSync(path.join(__dirname, `./logs/查询失败-${addressFile}-${formatted}`), `${address}\n`);
+            fs.appendFileSync(path.join(__dirname, `./logs/查询失败-${addressFile}-${formatted}.txt`), `${address}\n`);
         }
     }
     console.log(`\n查询完成，结果已保存至：./logs/查询成功-${addressFile}-${formatted}`);
